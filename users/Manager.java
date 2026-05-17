@@ -1,11 +1,13 @@
 package users;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import storage.DataStorage;
 import storage.LogEntry;
+import enums.LessonType;
 import enums.ManagerType;
 import academic.Course;
 import communication.News;
@@ -17,6 +19,8 @@ import organization.Report;
 public class Manager extends Employee {
     private ManagerType type;
     private List<Course> registrationCourses;
+    private Map<Course, Integer> courseTargetYear = new HashMap<>();
+    private Map<Course, String> courseTargetMajor = new HashMap<>();
 
     public Manager() {
         this.registrationCourses = new ArrayList<>();
@@ -29,11 +33,11 @@ public class Manager extends Employee {
         this.registrationCourses = new ArrayList<>();
     }
 
-    public void assignCourseToTeacher(Course c, Teacher t) {
-        c.addInstructor(t);
+    public void assignCourseToTeacher(Course c, Teacher t, LessonType type) {
+        c.addInstructor(type, t);
         t.addCourse(c);
         DataStorage.getInstance().addLog(new LogEntry(this,
-            "Assigned " + c.getName() + " to " + t.getFullName()));
+                "Assigned " + c.getName() + " to " + t.getFullName()));
         System.out.println(getFullName() + " assigned " + c.getName() + " to " + t.getFullName());
     }
 
@@ -46,9 +50,9 @@ public class Manager extends Employee {
     }
 
     public void addCourseForRegistration(Course c, int year, String major) {
-        c.setTargetYear(year);
-        c.setTargetMajor(major);
-        registrationCourses.add(c);
+        courseTargetYear.put(c, year);
+        courseTargetMajor.put(c, major);
+        if (!registrationCourses.contains(c)) registrationCourses.add(c);
         System.out.println("Course " + c.getName() + " added for year " + year + ", major " + major);
     }
 
@@ -68,8 +72,8 @@ public class Manager extends Employee {
         return all;
     }
 
-    public java.util.List<Complaint> viewComplaints() {
-        java.util.List<Complaint> complaints = new java.util.ArrayList<>();
+    public List<Complaint> viewComplaints() {
+        List<Complaint> complaints = new ArrayList<>();
         for (Message m : DataStorage.getInstance().getMessages()) {
             if (m instanceof Complaint) complaints.add((Complaint) m);
         }
@@ -118,6 +122,8 @@ public class Manager extends Employee {
 
     public ManagerType getType() { return type; }
     public List<Course> getRegistrationCourses() { return registrationCourses; }
+    public Integer getTargetYearForCourse(Course c) { return courseTargetYear.get(c); }
+    public String getTargetMajorForCourse(Course c) { return courseTargetMajor.get(c); }
 
     @Override
     public String toString() {

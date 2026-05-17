@@ -71,7 +71,7 @@ public class Teacher extends Employee implements Researcher {
 
     public List<Student> viewStudents(Course c) {
         if (!courses.contains(c)) return new ArrayList<>();
-        return c.getStudents();
+        return DataStorage.getInstance().getStudentsForCourse(c);
     }
 
     public void manageCourse(Course c) {
@@ -108,7 +108,7 @@ public class Teacher extends Employee implements Researcher {
         double sum = 0;
         int count = 0;
         int passing = 0;
-        for (Student s : c.getStudents()) {
+        for (Student s : DataStorage.getInstance().getStudentsForCourse(c)) {
             Mark m = s.getMarkFor(c);
             if (m != null) {
                 System.out.println("  " + s.getFullName() + ": " + m);

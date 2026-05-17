@@ -3,7 +3,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
+import enums.LessonType;
 import enums.CourseType;
 import users.Teacher;
 import users.Student;
@@ -14,18 +18,14 @@ public class Course implements Serializable {
     private int credits;
     private CourseType type;
     private String school;
-    private int targetYear;
-    private String targetMajor;
-    private Teacher lectureInstructor;
-    private Teacher practiceInstructor;
+    private Map<LessonType, Teacher> instructors = new HashMap<>();
     private List<Lesson> lessons;
-    private List<Student> students; // болу
     private List<Course> prerequisites;
     private int capacity;
 
+
     public Course() {
         this.lessons = new ArrayList<>();
-        this.students = new ArrayList<>();
         this.prerequisites = new ArrayList<>();
     }
 
@@ -37,9 +37,9 @@ public class Course implements Serializable {
         this.school = school;
         this.capacity = capacity;
         this.lessons = new ArrayList<>();
-        this.students = new ArrayList<>();
         this.prerequisites = new ArrayList<>();
     }
+
 
     public CourseType getTypeForStudent(Student s) {
         if (s.getSchool() != null && this.school != null && !s.getSchool().equals(this.school)) {
@@ -48,17 +48,9 @@ public class Course implements Serializable {
         return this.type;
     }
 
-    public void addStudent(Student s) {
-        if (!students.contains(s)) students.add(s);
-    }
 
-    public void removeStudent(Student s) {
-        students.remove(s);
-    }
-
-    public void addInstructor(Teacher t) {
-        if (lectureInstructor == null) lectureInstructor = t;
-        else if (practiceInstructor == null) practiceInstructor = t;
+    public void addInstructor(LessonType type, Teacher t) {
+        instructors.put(type, t);
     }
 
     public void addLesson(Lesson l) {
@@ -66,18 +58,15 @@ public class Course implements Serializable {
     }
 
     public List<Teacher> getInstructors() {
-        List<Teacher> list = new ArrayList<>();
-        if (lectureInstructor != null) list.add(lectureInstructor);
-        if (practiceInstructor != null) list.add(practiceInstructor);
-        return list;
+        return new ArrayList<>(instructors.values());
     }
 
-    public boolean hasAvailableSeats() {
-        return students.size() < capacity;
+    public boolean hasAvailableSeats(int enrolledCount) {
+        return enrolledCount < capacity;
     }
 
     public void addPrerequisite(Course c) {
-        prerequisites.add(c);
+        if (!prerequisites.contains(c)) prerequisites.add(c);
     }
 
     public String getCode() { return code; }
@@ -85,19 +74,14 @@ public class Course implements Serializable {
     public int getCredits() { return credits; }
     public CourseType getType() { return type; }
     public String getSchool() { return school; }
-    public int getTargetYear() { return targetYear; }
-    public String getTargetMajor() { return targetMajor; }
-    public Teacher getLectureInstructor() { return lectureInstructor; }
-    public Teacher getPracticeInstructor() { return practiceInstructor; }
-    public List<Lesson> getLessons() { return lessons; }
-    public List<Student> getStudents() { return students; }
-    public List<Course> getPrerequisites() { return prerequisites; }
+    public Teacher getLectureInstructor() { return instructors.get(LessonType.LECTURE); }
+    public Teacher getPracticeInstructor() { return instructors.get(LessonType.PRACTICE); }
+    public List<Lesson> getLessons() { return Collections.unmodifiableList(lessons); }
+    public List<Course> getPrerequisites() { return Collections.unmodifiableList(prerequisites); }
     public int getCapacity() { return capacity; }
 
-    public void setLectureInstructor(Teacher t) { this.lectureInstructor = t; }
-    public void setPracticeInstructor(Teacher t) { this.practiceInstructor = t; }
-    public void setTargetYear(int targetYear) { this.targetYear = targetYear; }
-    public void setTargetMajor(String targetMajor) { this.targetMajor = targetMajor; }
+    public void setLectureInstructor(Teacher t) { instructors.put(LessonType.LECTURE, t); }
+    public void setPracticeInstructor(Teacher t) { instructors.put(LessonType.PRACTICE, t); }
 
     @Override
     public boolean equals(Object o) {
@@ -115,6 +99,6 @@ public class Course implements Serializable {
     @Override
     public String toString() {
         return "Course{" + code + " - " + name + " (" + credits + " cr, " + type +
-               ", school=" + school + ", " + students.size() + "/" + capacity + ")}";
+                ", school=" + school + ", capacity=" + capacity + ")}";
     }
 }

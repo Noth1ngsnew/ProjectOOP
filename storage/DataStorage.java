@@ -1,10 +1,6 @@
 package storage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import users.User;
 import users.Student;
@@ -36,6 +32,7 @@ public class DataStorage implements Serializable {
     private List<ResearchPaper> allPapers;
     private List<ResearchProject> projects;
     private List<Attendance> attendances;
+    private Map<Course, List<Student>> enrollments = new HashMap<>();
 
     private DataStorage() {
         users = new ArrayList<>();
@@ -133,6 +130,22 @@ public class DataStorage implements Serializable {
             if (c.getCode().equals(code)) return c;
         }
         return null;
+    }
+
+    public void enrollStudent(Course c, Student s) {
+        enrollments.computeIfAbsent(c, k -> new ArrayList<>()).add(s);
+    }
+
+    public void unenrollStudent(Course c, Student s) {
+        if (enrollments.containsKey(c)) enrollments.get(c).remove(s);
+    }
+
+    public List<Student> getStudentsForCourse(Course c) {
+        return enrollments.getOrDefault(c, new ArrayList<>());
+    }
+
+    public int getEnrolledCount(Course c) {
+        return enrollments.getOrDefault(c, new ArrayList<>()).size();
     }
 
     // ── top cited: глобально ─────────────────────────────────────────────
