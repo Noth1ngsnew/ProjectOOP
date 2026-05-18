@@ -1,5 +1,7 @@
 package organization;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import users.Student;
@@ -7,13 +9,16 @@ import academic.Course;
 import academic.Mark;
 
 public class Transcript implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Student student;
     private Map<Course, Mark> courseGrades;
     private double gpa;
 
     public Transcript(Student s) {
+        if (s == null) throw new IllegalArgumentException("Student cannot be null");
         this.student = s;
-        this.courseGrades = s.viewMarks();
+        this.courseGrades = new HashMap<>(s.viewMarks());
         this.gpa = s.getGpa();
     }
 
@@ -36,7 +41,7 @@ public class Transcript implements Serializable {
     }
 
     public Student getStudent() { return student; }
-    public Map<Course, Mark> getCourseGrades() { return courseGrades; }
+    public Map<Course, Mark> getCourseGrades() { return Collections.unmodifiableMap(courseGrades); }
     public double getGpa() { return gpa; }
 
     @Override

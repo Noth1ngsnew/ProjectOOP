@@ -11,11 +11,14 @@ import users.Manager;
 import storage.DataStorage;
 
 public class Report implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Manager createdBy;
     private Date createdDate;
     private String content;
 
     public Report(Manager m) {
+        if (m == null) throw new IllegalArgumentException("Manager cannot be null");
         this.createdBy = m;
         this.createdDate = new Date();
         this.content = generateContent();
@@ -54,7 +57,7 @@ public class Report implements Serializable {
 
     public String getContent() { return content; }
     public Manager getCreatedBy() { return createdBy; }
-    public Date getCreatedDate() { return createdDate; }
+    public Date getCreatedDate() { return new Date(createdDate.getTime()); }
 
     @Override
     public String toString() {
