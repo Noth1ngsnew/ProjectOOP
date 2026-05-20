@@ -1,4 +1,5 @@
 package storage;
+
 import java.io.*;
 import java.util.*;
 
@@ -15,6 +16,7 @@ import communication.News;
 import communication.Message;
 import communication.Request;
 import enums.NewsTopic;
+import organization.StudentOrganization;
 
 public class DataStorage implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -33,6 +35,7 @@ public class DataStorage implements Serializable {
     private List<ResearchProject> projects;
     private List<Attendance> attendances;
     private Map<Course, List<Student>> enrollments;
+    private List<StudentOrganization> organizations;
 
     private DataStorage() {
         users = new ArrayList<>();
@@ -46,15 +49,16 @@ public class DataStorage implements Serializable {
         projects = new ArrayList<>();
         attendances = new ArrayList<>();
         enrollments = new HashMap<>();
+        organizations = new ArrayList<>();
     }
 
+    // Singletone
     public static synchronized DataStorage getInstance() {
-        if (instance == null) {
-            instance = new DataStorage();
-        }
+        if (instance == null) instance = new DataStorage();
         return instance;
     }
 
+    // Сериализация
     public void saveData() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
             oos.writeObject(this);
@@ -64,13 +68,13 @@ public class DataStorage implements Serializable {
         }
     }
 
+    // Десериализация
     public void loadData() {
         File f = new File(FILE_NAME);
         if (!f.exists()) {
             System.out.println("No saved data found.");
             return;
         }
-
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f))) {
             DataStorage loaded = (DataStorage) ois.readObject();
 
@@ -85,16 +89,15 @@ public class DataStorage implements Serializable {
             this.projects = loaded.projects != null ? loaded.projects : new ArrayList<>();
             this.attendances = loaded.attendances != null ? loaded.attendances : new ArrayList<>();
             this.enrollments = loaded.enrollments != null ? loaded.enrollments : new HashMap<>();
+            this.organizations = loaded.organizations != null ? loaded.organizations : new ArrayList<>();
 
             System.out.println("Data loaded successfully from " + FILE_NAME);
-
         } catch (ClassNotFoundException e) {
             System.out.println("Saved data is outdated or corrupted: " + e.getMessage());
         } catch (IOException e) {
             System.out.println("Couldn't read the save file: " + e.getMessage());
         }
     }
-
 
     public void addUser(User u) { if (!users.contains(u)) users.add(u); }
     public void removeUser(User u) { users.remove(u); }
@@ -106,15 +109,8 @@ public class DataStorage implements Serializable {
     public void addLog(LogEntry e) { logs.add(e); }
     public void addProject(ResearchProject p) { if (!projects.contains(p)) projects.add(p); }
     public void addAttendance(Attendance a) { attendances.add(a); }
-    public List<Attendance> getAttendances() { return attendances; }
-
-
-    public void addPaper(ResearchPaper p) {
-        if (!allPapers.contains(p)) {
-            allPapers.add(p);
-        }
-    }
-
+    public void addOrganization(StudentOrganization o) { if (!organizations.contains(o)) organizations.add(o); }
+    public void addPaper(ResearchPaper p) { if (!allPapers.contains(p)) allPapers.add(p); }
 
     public List<User> getUsers() { return users; }
     public List<Course> getCourses() { return courses; }
@@ -125,20 +121,27 @@ public class DataStorage implements Serializable {
     public List<LogEntry> getLogs() { return logs; }
     public List<ResearchPaper> getAllPapers() { return allPapers; }
     public List<ResearchProject> getProjects() { return projects; }
+    public List<Attendance> getAttendances() { return attendances; }
+    public List<StudentOrganization> getOrganizations() { return organizations; }
+
+    public List<Student> getStudents() {
+        List<Student> result = new ArrayList<>();
+        for (User u : users) {
+            if (u instanceof Student) result.add((Student) u);
+        }
+        return result;
+    }
 
     public User findUserById(String id) {
-        for (User u : users) {
-            if (u.getId().equals(id)) return u;
-        }
+        for (User u : users) { if (u.getId().equals(id)) return u; }
         return null;
     }
 
     public Course findCourseByCode(String code) {
-        for (Course c : courses) {
-            if (c.getCode().equals(code)) return c;
-        }
+        for (Course c : courses) { if (c.getCode().equals(code)) return c; }
         return null;
     }
+
 
     public void enrollStudent(Course c, Student s) {
         enrollments.computeIfAbsent(c, k -> new ArrayList<>()).add(s);
@@ -156,16 +159,15 @@ public class DataStorage implements Serializable {
         return enrollments.getOrDefault(c, new ArrayList<>()).size();
     }
 
+
+
     public Researcher getTopCitedResearcher() {
         Researcher top = null;
         int max = -1;
         for (User u : users) {
             if (u instanceof Researcher r) {
-                int citations = r.getTotalCitations();
-                if (citations > max) {
-                    max = citations;
-                    top = r;
-                }
+                int c = r.getTotalCitations();
+                if (c > max) { max = c; top = r; }
             }
         }
         return top;
@@ -176,31 +178,20 @@ public class DataStorage implements Serializable {
         int max = -1;
         for (User u : users) {
             if (!(u instanceof Researcher r)) continue;
-
             boolean inSchool = false;
-            if (u instanceof Student && school.equals(((Student) u).getSchool())) {
-                inSchool = true;
-            }
-            if (u instanceof Teacher && school.equals(((Teacher) u).getDepartment())) {
-                inSchool = true;
-            }
+            if (u instanceof Student && school.equals(((Student) u).getSchool())) inSchool = true;
+            if (u instanceof Teacher && school.equals(((Teacher) u).getDepartment())) inSchool = true;
             if (!inSchool) {
                 for (ResearchPaper p : r.getPapers()) {
-                    if (p.getJournal() != null &&
-                        p.getJournal().getName().toLowerCase()
-                         .contains(school.toLowerCase())) {
+                    if (p.getJournal() != null && p.getJournal().getName().toLowerCase().contains(school.toLowerCase())) {
                         inSchool = true;
                         break;
                     }
                 }
             }
-
             if (inSchool) {
-                int citations = r.getTotalCitations();
-                if (citations > max) {
-                    max = citations;
-                    top = r;
-                }
+                int c = r.getTotalCitations();
+                if (c > max) { max = c; top = r; }
             }
         }
         return top;
@@ -210,62 +201,46 @@ public class DataStorage implements Serializable {
         Researcher top = null;
         int max = -1;
         for (User u : users) {
-            if (!(u instanceof Researcher)) continue;
-            Researcher r = (Researcher) u;
-
+            if (!(u instanceof Researcher r)) continue;
             int citations = 0;
             for (ResearchPaper p : r.getPapers()) {
                 if (p.getPublicationDate() != null) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(p.getPublicationDate());
-                    if (cal.get(Calendar.YEAR) == year) {
-                        citations += p.getCitations();
-                    }
+                    if (cal.get(Calendar.YEAR) == year) citations += p.getCitations();
                 }
             }
-            if (citations > max) {
-                max = citations;
-                top = r;
-            }
+            if (citations > max) { max = citations; top = r; }
         }
         return top;
     }
 
-    public void printAllPapers(Comparator<ResearchPaper> comparator) { // Использование Strategy Pattern
+    public void printAllPapers(Comparator<ResearchPaper> comparator) {
         List<ResearchPaper> all = new ArrayList<>(allPapers);
         all.sort(comparator);
         System.out.println("\n--- All Research Papers (" + all.size() + ") ---");
-        for (ResearchPaper p : all) {
-            System.out.println("  " + p);
-        }
+        for (ResearchPaper p : all) System.out.println("  " + p);
         System.out.println("-------------------------------------\n");
     }
 
     public void announceTopCitedResearcher() {
         Researcher top = getTopCitedResearcher();
-        if (top == null) return;
-        if (top.getTotalCitations() == 0) return;
+        if (top == null || top.getTotalCitations() == 0) return;
 
-        String newsTitle = "Top Cited Researcher";
-        String content = top.getName() + " is currently the top cited researcher " +
-                         "with " + top.getTotalCitations() + " total citations.";
+        String title = "Top Cited Researcher";
+        String content = top.getName() + " is currently the top cited researcher with " +
+                top.getTotalCitations() + " total citations.";
 
         User author = null;
         for (User u : users) {
-            if (u instanceof Researcher && u.equals(top)) {
-                author = u;
-                break;
-            }
+            if (u instanceof Researcher && u.equals(top)) { author = u; break; }
         }
 
-        news.removeIf(n -> newsTitle.equals(n.getTitle()));
-
-        News announcement = new News(NewsTopic.RESEARCH, newsTitle, content, author);
+        news.removeIf(n -> title.equals(n.getTitle()));
+        News announcement = new News(NewsTopic.RESEARCH, title, content, author);
         news.add(announcement);
         Collections.sort(news);
 
-        System.out.println("[AUTO NEWS] Top cited researcher updated: " +
-                           top.getName() + " (" + top.getTotalCitations() + " citations)");
+        System.out.println("[AUTO NEWS] Top cited researcher: " + top.getName() + " (" + top.getTotalCitations() + " citations)");
     }
-
 }
