@@ -9,6 +9,7 @@ import storage.LogEntry;
 import enums.TeacherPosition;
 import enums.UrgencyLevel;
 import enums.NewsTopic;
+import enums.ManagerType;
 import academic.Course;
 import academic.Mark;
 import academic.Attendance;
@@ -64,7 +65,8 @@ public class Teacher extends Employee implements Researcher {
 
     private Manager findDean() {
         for (User u : DataStorage.getInstance().getUsers()) {
-            if (u instanceof Manager) return (Manager) u;
+            if (u instanceof Manager && ((Manager) u).getType() == ManagerType.DEPARTMENT)
+                return (Manager) u;
         }
         return null;
     }

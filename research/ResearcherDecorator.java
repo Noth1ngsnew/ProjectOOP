@@ -11,6 +11,8 @@ import communication.News;
 import exceptions.NonResearcherException;
 
 public class ResearcherDecorator implements Researcher, Serializable {
+    private static final long serialVersionUID = 1L;
+
     private User wrappedUser;
     private List<ResearchPaper> papers;
     private List<ResearchProject> projects;
@@ -26,6 +28,7 @@ public class ResearcherDecorator implements Researcher, Serializable {
 
     @Override
     public void publishPaper(ResearchPaper p) {
+        if (p == null) throw new IllegalArgumentException("Paper cannot be null");
         if (!papers.contains(p)) {
             papers.add(p);
         }
@@ -88,7 +91,7 @@ public class ResearcherDecorator implements Researcher, Serializable {
 
     @Override
     public String getFullName() {
-        return "";
+        return wrappedUser.getFullName();
     }
 
     public User getWrappedUser() {

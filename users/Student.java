@@ -49,7 +49,7 @@ public class Student extends User implements Comparable<Student> {
     }
 
     public void registerForCourse(Course c) throws CreditLimitExceededException, FailLimitExceededException {
-        if (failedCount > MAX_FAILS) {
+        if (failedCount >= MAX_FAILS) {
             throw new FailLimitExceededException(
                 "Student " + getFullName() + " has failed " + failedCount + " times (max " + MAX_FAILS + ")");
         }

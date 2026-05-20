@@ -9,6 +9,8 @@ import java.util.Objects;
 import enums.Format;
 
 public class ResearchPaper implements Comparable<ResearchPaper>, Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String title;
     private List<Researcher> authors;
     private Journal journal;
@@ -24,6 +26,7 @@ public class ResearchPaper implements Comparable<ResearchPaper>, Serializable {
 
     public ResearchPaper(String title, List<Researcher> authors, Journal journal,
                          int pages, Date publicationDate, String doi, int citations) {
+        if (publicationDate == null) throw new IllegalStateException("Publication date is not set");
         this.title = title;
         this.authors = authors != null ? authors : new ArrayList<>();
         this.journal = journal;
@@ -59,8 +62,6 @@ public class ResearchPaper implements Comparable<ResearchPaper>, Serializable {
     }
 
 
-    public int getPageLength() { return pages; }
-
     public void incrementCitations() { citations++; }
 
     @Override
@@ -79,7 +80,10 @@ public class ResearchPaper implements Comparable<ResearchPaper>, Serializable {
 
     public void setTitle(String title) { this.title = title; }
     public void setJournal(Journal journal) { this.journal = journal; }
-    public void setCitations(int citations) { this.citations = citations; }
+    public void setCitations(int citations) {
+        if (citations < 0) throw new IllegalArgumentException("Citations cannot be negative");
+        this.citations = citations;
+    }
 
     public void addAuthor(Researcher r) {
         if (!authors.contains(r)) authors.add(r);
@@ -88,8 +92,7 @@ public class ResearchPaper implements Comparable<ResearchPaper>, Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ResearchPaper)) return false;
-        ResearchPaper r = (ResearchPaper) o;
+        if (!(o instanceof ResearchPaper r)) return false;
         return Objects.equals(doi, r.doi);
     }
 

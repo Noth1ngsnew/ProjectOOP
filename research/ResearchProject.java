@@ -7,6 +7,8 @@ import java.util.List;
 import exceptions.NonResearcherException;
 
 public class ResearchProject implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String topic;
     private List<Researcher> participants;
     private List<ResearchPaper> publishedPapers;
