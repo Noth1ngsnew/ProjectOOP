@@ -1,4 +1,5 @@
 package users;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,12 +52,12 @@ public class Student extends User implements Comparable<Student> {
     public void registerForCourse(Course c) throws CreditLimitExceededException, FailLimitExceededException {
         if (failedCount >= MAX_FAILS) {
             throw new FailLimitExceededException(
-                "Student " + getFullName() + " has failed " + failedCount + " times (max " + MAX_FAILS + ")");
+                    "Student " + getFullName() + " has failed " + failedCount + " times (max " + MAX_FAILS + ")");
         }
         if (totalCredits + c.getCredits() > MAX_CREDITS) {
             throw new CreditLimitExceededException(
-                "Cannot register: total credits would be " + (totalCredits + c.getCredits()) +
-                " (max " + MAX_CREDITS + ")");
+                    "Cannot register: total credits would be " + (totalCredits + c.getCredits()) +
+                            " (max " + MAX_CREDITS + ")");
         }
         if (!c.hasAvailableSeats(DataStorage.getInstance().getEnrolledCount(c))) {
             System.out.println("Course " + c.getName() + " is full.");
@@ -67,7 +68,7 @@ public class Student extends User implements Comparable<Student> {
         totalCredits += c.getCredits();
         DataStorage.getInstance().addLog(new LogEntry(this, "REGISTERED for " + c.getName()));
         System.out.println(getFullName() + " registered for " + c.getName() +
-                           " (total credits: " + totalCredits + ")");
+                " (total credits: " + totalCredits + ")");
     }
 
     public void dropCourse(Course c) {
@@ -94,8 +95,8 @@ public class Student extends User implements Comparable<Student> {
         recalculateGpa();
     }
 
-    public java.util.List<Attendance> viewAttendance() {
-        java.util.List<Attendance> mine = new java.util.ArrayList<>();
+    public List<Attendance> viewAttendance() {
+        List<Attendance> mine = new ArrayList<>();
         for (Attendance a : DataStorage.getInstance().getAttendances()) {
             if (a.getStudent().equals(this)) mine.add(a);
         }
@@ -107,13 +108,35 @@ public class Student extends User implements Comparable<Student> {
             gpa = 0.0;
             return;
         }
-        double sum = 0;
-        int count = 0;
-        for (Mark m : marks.values()) {
-            sum += m.getTotal();
-            count++;
+
+        double totalPoints = 0.0;
+        int totalCreditsCounted = 0;
+
+        for (Map.Entry<Course, Mark> entry : marks.entrySet()) {
+            Course c = entry.getKey();
+            Mark m = entry.getValue();
+
+            double points = 0.0;
+            switch (m.getLetterGrade()) {
+                case "A":  points = 4.0; break;
+                case "A-": points = 3.67; break;
+                case "B+": points = 3.33; break;
+                case "B":  points = 3.0; break;
+                case "B-": points = 2.67; break;
+                case "C+": points = 2.33; break;
+                case "C":  points = 2.0; break;
+                case "C-": points = 1.67; break;
+                case "D+": points = 1.33; break;
+                case "D":  points = 1.0; break;
+                default:   points = 0.0; break;
+            }
+
+            int courseCredits = c.getCredits();
+            totalPoints += points * courseCredits;
+            totalCreditsCounted += courseCredits;
         }
-        gpa = sum / count;
+
+        gpa = totalCreditsCounted == 0 ? 0.0 : totalPoints / totalCreditsCounted;
     }
 
     public Transcript viewTranscript() {
@@ -171,8 +194,8 @@ public class Student extends User implements Comparable<Student> {
     @Override
     public String toString() {
         return "Student{id='" + studentId + "', name='" + getFullName() +
-               "', school='" + school + "', year=" + yearOfStudy +
-               ", GPA=" + String.format("%.2f", gpa) +
-               ", credits=" + totalCredits + "}";
+                "', school='" + school + "', year=" + yearOfStudy +
+                ", GPA=" + String.format("%.2f", gpa) +
+                ", credits=" + totalCredits + "}";
     }
 }

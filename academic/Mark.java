@@ -13,10 +13,14 @@ public class Mark implements Serializable, Comparable<Mark> {
     }
 
     public Mark(double firstAttestation, double secondAttestation, double finalExam) {
-        if (firstAttestation < 0 || firstAttestation > 100 ||
-            secondAttestation < 0 || secondAttestation > 100 ||
-            finalExam < 0 || finalExam > 100) {
-            throw new IllegalArgumentException("Marks must be between 0 and 100");
+        if (firstAttestation < 0 || secondAttestation < 0 || finalExam < 0) {
+            throw new IllegalArgumentException("Marks cannot be negative");
+        }
+        if (firstAttestation + secondAttestation > 60) {
+            throw new IllegalArgumentException("The sum of first and second attestations cannot exceed 60");
+        }
+        if (finalExam > 40) {
+            throw new IllegalArgumentException("Final exam mark cannot exceed 40");
         }
         this.firstAttestation = firstAttestation;
         this.secondAttestation = secondAttestation;
@@ -24,7 +28,7 @@ public class Mark implements Serializable, Comparable<Mark> {
     }
 
     public double getTotal() {
-        return firstAttestation * 0.3 + secondAttestation * 0.3 + finalExam * 0.4;
+        return firstAttestation + secondAttestation + finalExam;
     }
 
     public String getLetterGrade() {
@@ -51,15 +55,23 @@ public class Mark implements Serializable, Comparable<Mark> {
     public double getFinalExam() { return finalExam; }
 
     public void setFirstAttestation(double v) {
-        if (v < 0 || v > 100) throw new IllegalArgumentException("Mark must be between 0 and 100");
+        if (v < 0) throw new IllegalArgumentException("Mark cannot be negative");
+        if (v + this.secondAttestation > 60) {
+            throw new IllegalArgumentException("Total attestation mark (1A + 2A) cannot exceed 60");
+        }
         this.firstAttestation = v;
     }
+
     public void setSecondAttestation(double v) {
-        if (v < 0 || v > 100) throw new IllegalArgumentException("Mark must be between 0 and 100");
+        if (v < 0) throw new IllegalArgumentException("Mark cannot be negative");
+        if (this.firstAttestation + v > 60) {
+            throw new IllegalArgumentException("Total attestation mark (1A + 2A) cannot exceed 60");
+        }
         this.secondAttestation = v;
     }
+
     public void setFinalExam(double v) {
-        if (v < 0 || v > 100) throw new IllegalArgumentException("Mark must be between 0 and 100");
+        if (v < 0 || v > 40) throw new IllegalArgumentException("Final exam mark must be between 0 and 40");
         this.finalExam = v;
     }
 
@@ -74,8 +86,8 @@ public class Mark implements Serializable, Comparable<Mark> {
         if (!(o instanceof Mark)) return false;
         Mark m = (Mark) o;
         return Double.compare(firstAttestation, m.firstAttestation) == 0 &&
-               Double.compare(secondAttestation, m.secondAttestation) == 0 &&
-               Double.compare(finalExam, m.finalExam) == 0;
+                Double.compare(secondAttestation, m.secondAttestation) == 0 &&
+                Double.compare(finalExam, m.finalExam) == 0;
     }
 
     @Override
@@ -86,6 +98,6 @@ public class Mark implements Serializable, Comparable<Mark> {
     @Override
     public String toString() {
         return String.format("%s (1A=%.1f, 2A=%.1f, F=%.1f, total=%.2f)",
-                             getLetterGrade(), firstAttestation, secondAttestation, finalExam, getTotal());
+                getLetterGrade(), firstAttestation, secondAttestation, finalExam, getTotal());
     }
 }

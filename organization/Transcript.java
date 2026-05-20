@@ -32,7 +32,7 @@ public class Transcript implements Serializable {
         sb.append("--------------------------------\n");
         for (Map.Entry<Course, Mark> entry : courseGrades.entrySet()) {
             sb.append(String.format("  %-30s %s%n",
-                entry.getKey().getName(), entry.getValue().getLetterGrade()));
+                    entry.getKey().getName(), entry.getValue().getLetterGrade()));
         }
         sb.append("--------------------------------\n");
         sb.append(String.format("GPA: %.2f%n", gpa));

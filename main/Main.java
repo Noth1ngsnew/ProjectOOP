@@ -186,10 +186,10 @@ public class Main {
         // --------------------------
         header("MARKS & GPA");
 
-        Mark aselOopMark  = new Mark(85, 90, 88);
-        Mark aselMathMark = new Mark(70, 75, 80);
-        Mark damirOopMark = new Mark(50, 45, 55);
-        Mark damirMlMark  = new Mark(92, 95, 90);
+        Mark aselOopMark  = new Mark(25.5, 27.0, 35.2);
+        Mark aselMathMark = new Mark(21.0, 22.5, 32.0);
+        Mark damirOopMark = new Mark(15.0, 13.5, 22.0);
+        Mark damirMlMark  = new Mark(27.6, 28.5, 36.0);
 
         profAliya.putMark(studentAsel,  oop,  aselOopMark);
         profAliya.putMark(studentAsel,  math, aselMathMark);
