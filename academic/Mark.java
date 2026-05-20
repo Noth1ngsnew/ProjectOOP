@@ -3,6 +3,8 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Mark implements Serializable, Comparable<Mark> {
+    private static final long serialVersionUID = 1L;
+
     private double firstAttestation;
     private double secondAttestation;
     private double finalExam;
@@ -48,9 +50,18 @@ public class Mark implements Serializable, Comparable<Mark> {
     public double getSecondAttestation() { return secondAttestation; }
     public double getFinalExam() { return finalExam; }
 
-    public void setFirstAttestation(double v) { this.firstAttestation = v; }
-    public void setSecondAttestation(double v) { this.secondAttestation = v; }
-    public void setFinalExam(double v) { this.finalExam = v; }
+    public void setFirstAttestation(double v) {
+        if (v < 0 || v > 100) throw new IllegalArgumentException("Mark must be between 0 and 100");
+        this.firstAttestation = v;
+    }
+    public void setSecondAttestation(double v) {
+        if (v < 0 || v > 100) throw new IllegalArgumentException("Mark must be between 0 and 100");
+        this.secondAttestation = v;
+    }
+    public void setFinalExam(double v) {
+        if (v < 0 || v > 100) throw new IllegalArgumentException("Mark must be between 0 and 100");
+        this.finalExam = v;
+    }
 
     @Override
     public int compareTo(Mark other) {

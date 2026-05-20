@@ -1,32 +1,37 @@
 package academic;
 import java.io.Serializable;
 
+import enums.DayOfWeek;
 import enums.LessonType;
 import users.Teacher;
 
 public class Lesson implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private LessonType type;
     private String room;
-    private String dayOfWeek;
+    private DayOfWeek dayOfWeek;
     private String startTime;
     private int duration;
     private Teacher instructor;
 
+
     public Lesson() {
     }
 
-    public Lesson(LessonType type, String room, String dayOfWeek, String startTime, int duration, Teacher instructor) {
+    public Lesson(LessonType type, String room, DayOfWeek dayOfWeek, String startTime, int duration, Teacher instructor) {
         this.type = type;
         this.room = room;
         this.dayOfWeek = dayOfWeek;
         this.startTime = startTime;
+        if (duration <= 0) throw new IllegalArgumentException("Duration must be positive");
         this.duration = duration;
         this.instructor = instructor;
     }
 
     public LessonType getType() { return type; }
     public String getRoom() { return room; }
-    public String getDayOfWeek() { return dayOfWeek; }
+    public DayOfWeek getDayOfWeek() { return dayOfWeek; }
     public String getStartTime() { return startTime; }
     public int getDuration() { return duration; }
     public Teacher getInstructor() { return instructor; }
@@ -37,6 +42,10 @@ public class Lesson implements Serializable {
 
     @Override
     public String toString() {
-        return type + " in " + room + " on " + dayOfWeek + " at " + startTime + " (" + duration + "min)";
+        return (type != null ? type : "NO_TYPE") +
+                " in " + (room != null ? room : "NO_ROOM") +
+                " on " + (dayOfWeek != null ? dayOfWeek : "NO_DAY") +
+                " at " + (startTime != null ? startTime : "NO_TIME") +
+                " (" + duration + "min)";
     }
 }

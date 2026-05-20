@@ -4,6 +4,7 @@ import users.User;
 import users.Student;
 
 public class Complaint extends Message {
+    private static final long serialVersionUID = 1L;
     private Student aboutStudent;
     private UrgencyLevel urgency;
 
@@ -14,6 +15,7 @@ public class Complaint extends Message {
                      Student aboutStudent, UrgencyLevel urgency) {
         super(sender, receiver, subject, content);
         this.aboutStudent = aboutStudent;
+        if (urgency == null) throw new IllegalArgumentException("Urgency level cannot be null");
         this.urgency = urgency;
         setOfficial(true);
     }

@@ -5,33 +5,36 @@ import java.util.Date;
 import users.User;
 
 public class Message implements Serializable {
-    protected User sender;
-    protected User receiver;
-    protected String subject;
-    protected String content;
-    protected Date sentDate;
-    protected boolean isOfficial;
+    private static final long serialVersionUID = 1L;
+
+    private User sender;
+    private User receiver;
+    private String subject;
+    private String content;
+    private Date sentDate;
+    private boolean official;
 
     public Message() {
     }
 
     public Message(User sender, User receiver, String subject, String content) {
+        if (subject == null || subject.isBlank()) throw new IllegalArgumentException("Subject cannot be empty");
+        if (content == null || content.isBlank()) throw new IllegalArgumentException("Content cannot be empty");
         this.sender = sender;
         this.receiver = receiver;
         this.subject = subject;
         this.content = content;
         this.sentDate = new Date();
-        this.isOfficial = false;
+        this.official = false;
     }
 
     public User getSender() { return sender; }
     public User getReceiver() { return receiver; }
     public String getSubject() { return subject; }
     public String getContent() { return content; }
-    public Date getSentDate() { return sentDate; }
-    public boolean isOfficial() { return isOfficial; }
-
-    public void setOfficial(boolean official) { this.isOfficial = official; }
+    public Date getSentDate() { return new Date(sentDate.getTime()); }
+    public boolean isOfficial() { return official; }
+    public void setOfficial(boolean official) { this.official = official; }
 
     @Override
     public String toString() {

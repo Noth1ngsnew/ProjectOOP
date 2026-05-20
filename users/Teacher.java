@@ -9,6 +9,7 @@ import storage.LogEntry;
 import enums.TeacherPosition;
 import enums.UrgencyLevel;
 import enums.NewsTopic;
+import enums.ManagerType;
 import academic.Course;
 import academic.Mark;
 import academic.Attendance;
@@ -64,14 +65,15 @@ public class Teacher extends Employee implements Researcher {
 
     private Manager findDean() {
         for (User u : DataStorage.getInstance().getUsers()) {
-            if (u instanceof Manager) return (Manager) u;
+            if (u instanceof Manager && ((Manager) u).getType() == ManagerType.DEPARTMENT)
+                return (Manager) u;
         }
         return null;
     }
 
     public List<Student> viewStudents(Course c) {
         if (!courses.contains(c)) return new ArrayList<>();
-        return c.getStudents();
+        return DataStorage.getInstance().getStudentsForCourse(c);
     }
 
     public void manageCourse(Course c) {
@@ -104,11 +106,11 @@ public class Teacher extends Employee implements Researcher {
             System.out.println("You don't teach " + c.getName());
             return;
         }
-        System.out.println("\n=== Mark Report: " + c.getName() + " ===");
+        System.out.println("\n--- Mark Report: " + c.getName() + " ---");
         double sum = 0;
         int count = 0;
         int passing = 0;
-        for (Student s : c.getStudents()) {
+        for (Student s : DataStorage.getInstance().getStudentsForCourse(c)) {
             Mark m = s.getMarkFor(c);
             if (m != null) {
                 System.out.println("  " + s.getFullName() + ": " + m);
@@ -120,7 +122,7 @@ public class Teacher extends Employee implements Researcher {
         if (count > 0) {
             System.out.printf("Average: %.2f, Passing: %d/%d%n", sum / count, passing, count);
         }
-        System.out.println("============================\n");
+        System.out.println("----------------------------\n");
     }
 
     public void addRating(double rating) {

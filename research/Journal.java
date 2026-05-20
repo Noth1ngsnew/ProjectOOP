@@ -36,7 +36,7 @@ public class Journal implements Serializable {
         subscribers.remove(s);
     }
 
-    public void notifySubscribers(ResearchPaper p) {
+    private void notifySubscribers(ResearchPaper p) { // Отправляет уведомление подписчикам
         for (JournalSubscriber s : subscribers) {
             s.notifyNewPaper(this, p);
         }

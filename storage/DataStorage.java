@@ -1,10 +1,6 @@
 package storage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import users.User;
 import users.Student;
@@ -36,6 +32,7 @@ public class DataStorage implements Serializable {
     private List<ResearchPaper> allPapers;
     private List<ResearchProject> projects;
     private List<Attendance> attendances;
+    private Map<Course, List<Student>> enrollments;
 
     private DataStorage() {
         users = new ArrayList<>();
@@ -48,6 +45,7 @@ public class DataStorage implements Serializable {
         allPapers = new ArrayList<>();
         projects = new ArrayList<>();
         attendances = new ArrayList<>();
+        enrollments = new HashMap<>();
     }
 
     public static synchronized DataStorage getInstance() {
@@ -72,21 +70,28 @@ public class DataStorage implements Serializable {
             System.out.println("No saved data found.");
             return;
         }
+
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f))) {
             DataStorage loaded = (DataStorage) ois.readObject();
-            this.users = loaded.users;
-            this.courses = loaded.courses;
-            this.news = loaded.news;
-            this.journals = loaded.journals;
-            this.requests = loaded.requests;
-            this.messages = loaded.messages;
-            this.logs = loaded.logs;
-            this.allPapers = loaded.allPapers;
-            this.projects = loaded.projects;
-            this.attendances = loaded.attendances;
-            System.out.println("Data loaded from " + FILE_NAME);
-        } catch (Exception e) {
-            System.out.println("Error loading data: " + e.getMessage());
+
+            this.users = loaded.users != null ? loaded.users : new ArrayList<>();
+            this.courses = loaded.courses != null ? loaded.courses : new ArrayList<>();
+            this.news = loaded.news != null ? loaded.news : new ArrayList<>();
+            this.journals = loaded.journals != null ? loaded.journals : new ArrayList<>();
+            this.requests = loaded.requests != null ? loaded.requests : new ArrayList<>();
+            this.messages = loaded.messages != null ? loaded.messages : new ArrayList<>();
+            this.logs = loaded.logs != null ? loaded.logs : new ArrayList<>();
+            this.allPapers = loaded.allPapers != null ? loaded.allPapers : new ArrayList<>();
+            this.projects = loaded.projects != null ? loaded.projects : new ArrayList<>();
+            this.attendances = loaded.attendances != null ? loaded.attendances : new ArrayList<>();
+            this.enrollments = loaded.enrollments != null ? loaded.enrollments : new HashMap<>();
+
+            System.out.println("Data loaded successfully from " + FILE_NAME);
+
+        } catch (ClassNotFoundException e) {
+            System.out.println("Saved data is outdated or corrupted: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Couldn't read the save file: " + e.getMessage());
         }
     }
 
@@ -107,9 +112,9 @@ public class DataStorage implements Serializable {
     public void addPaper(ResearchPaper p) {
         if (!allPapers.contains(p)) {
             allPapers.add(p);
-            announceTopCitedResearcher();
         }
     }
+
 
     public List<User> getUsers() { return users; }
     public List<Course> getCourses() { return courses; }
@@ -135,14 +140,27 @@ public class DataStorage implements Serializable {
         return null;
     }
 
-    // ── top cited: глобально ─────────────────────────────────────────────
+    public void enrollStudent(Course c, Student s) {
+        enrollments.computeIfAbsent(c, k -> new ArrayList<>()).add(s);
+    }
+
+    public void unenrollStudent(Course c, Student s) {
+        if (enrollments.containsKey(c)) enrollments.get(c).remove(s);
+    }
+
+    public List<Student> getStudentsForCourse(Course c) {
+        return enrollments.getOrDefault(c, new ArrayList<>());
+    }
+
+    public int getEnrolledCount(Course c) {
+        return enrollments.getOrDefault(c, new ArrayList<>()).size();
+    }
 
     public Researcher getTopCitedResearcher() {
         Researcher top = null;
         int max = -1;
         for (User u : users) {
-            if (u instanceof Researcher) {
-                Researcher r = (Researcher) u;
+            if (u instanceof Researcher r) {
                 int citations = r.getTotalCitations();
                 if (citations > max) {
                     max = citations;
@@ -153,25 +171,19 @@ public class DataStorage implements Serializable {
         return top;
     }
 
-    // ── top cited: по школе / департаменту ───────────────────────────────
-
     public Researcher getTopCitedResearcherBySchool(String school) {
         Researcher top = null;
         int max = -1;
         for (User u : users) {
-            if (!(u instanceof Researcher)) continue;
-            Researcher r = (Researcher) u;
+            if (!(u instanceof Researcher r)) continue;
 
             boolean inSchool = false;
-            // для Student/GraduateStudent проверяем поле school
             if (u instanceof Student && school.equals(((Student) u).getSchool())) {
                 inSchool = true;
             }
-            // для Teacher проверяем department
             if (u instanceof Teacher && school.equals(((Teacher) u).getDepartment())) {
                 inSchool = true;
             }
-            // запасной вариант: имя журнала содержит название школы
             if (!inSchool) {
                 for (ResearchPaper p : r.getPapers()) {
                     if (p.getJournal() != null &&
@@ -193,8 +205,6 @@ public class DataStorage implements Serializable {
         }
         return top;
     }
-
-    // ── top cited: по году публикации ─────────────────────────────────────
 
     public Researcher getTopCitedResearcherByYear(int year) {
         Researcher top = null;
@@ -221,21 +231,17 @@ public class DataStorage implements Serializable {
         return top;
     }
 
-    // ── печать всех бумаг университета отсортированных ───────────────────
-
-    public void printAllPapers(Comparator<ResearchPaper> comparator) {
+    public void printAllPapers(Comparator<ResearchPaper> comparator) { // Использование Strategy Pattern
         List<ResearchPaper> all = new ArrayList<>(allPapers);
         all.sort(comparator);
-        System.out.println("\n=== All Research Papers (" + all.size() + ") ===");
+        System.out.println("\n--- All Research Papers (" + all.size() + ") ---");
         for (ResearchPaper p : all) {
             System.out.println("  " + p);
         }
-        System.out.println("=====================================\n");
+        System.out.println("-------------------------------------\n");
     }
 
-    // ── приватный метод: авто-новость о top cited ─────────────────────────
-
-    private void announceTopCitedResearcher() {
+    public void announceTopCitedResearcher() {
         Researcher top = getTopCitedResearcher();
         if (top == null) return;
         if (top.getTotalCitations() == 0) return;
@@ -244,7 +250,6 @@ public class DataStorage implements Serializable {
         String content = top.getName() + " is currently the top cited researcher " +
                          "with " + top.getTotalCitations() + " total citations.";
 
-        // находим User-объект для поля author в News
         User author = null;
         for (User u : users) {
             if (u instanceof Researcher && u.equals(top)) {
@@ -253,7 +258,6 @@ public class DataStorage implements Serializable {
             }
         }
 
-        // удаляем старую новость с тем же заголовком, чтобы не копились дубликаты
         news.removeIf(n -> newsTitle.equals(n.getTitle()));
 
         News announcement = new News(NewsTopic.RESEARCH, newsTitle, content, author);

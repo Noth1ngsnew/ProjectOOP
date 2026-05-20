@@ -7,10 +7,13 @@ import java.util.Objects;
 import users.Student;
 
 public class Attendance implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Student student;
     private Course course;
     private Date date;
     private boolean present;
+
 
     public Attendance() {
     }
@@ -46,7 +49,9 @@ public class Attendance implements Serializable {
     @Override
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        return "[" + sdf.format(date) + "] " + student.getFullName() +
-                " in " + course.getName() + ": " + (present ? "PRESENT" : "ABSENT");
+        return "[" + (date != null ? sdf.format(date) : "no date") + "] " +
+                (student != null ? student.getFullName() : "no student") +
+                " in " + (course != null ? course.getName() : "no course") +
+                ": " + (present ? "PRESENT" : "ABSENT");
     }
 }

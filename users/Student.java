@@ -49,7 +49,7 @@ public class Student extends User implements Comparable<Student> {
     }
 
     public void registerForCourse(Course c) throws CreditLimitExceededException, FailLimitExceededException {
-        if (failedCount > MAX_FAILS) {
+        if (failedCount >= MAX_FAILS) {
             throw new FailLimitExceededException(
                 "Student " + getFullName() + " has failed " + failedCount + " times (max " + MAX_FAILS + ")");
         }
@@ -58,12 +58,12 @@ public class Student extends User implements Comparable<Student> {
                 "Cannot register: total credits would be " + (totalCredits + c.getCredits()) +
                 " (max " + MAX_CREDITS + ")");
         }
-        if (!c.hasAvailableSeats()) {
+        if (!c.hasAvailableSeats(DataStorage.getInstance().getEnrolledCount(c))) {
             System.out.println("Course " + c.getName() + " is full.");
             return;
         }
         courses.add(c);
-        c.addStudent(this);
+        DataStorage.getInstance().enrollStudent(c, this);
         totalCredits += c.getCredits();
         DataStorage.getInstance().addLog(new LogEntry(this, "REGISTERED for " + c.getName()));
         System.out.println(getFullName() + " registered for " + c.getName() +
@@ -72,7 +72,7 @@ public class Student extends User implements Comparable<Student> {
 
     public void dropCourse(Course c) {
         if (courses.remove(c)) {
-            c.removeStudent(this);
+            DataStorage.getInstance().unenrollStudent(c, this);
             totalCredits -= c.getCredits();
             System.out.println(getFullName() + " dropped " + c.getName());
         }

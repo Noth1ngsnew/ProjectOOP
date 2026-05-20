@@ -10,12 +10,14 @@ import storage.DataStorage;
 import communication.News;
 import exceptions.NonResearcherException;
 
-public class ResearcherDecorator implements Researcher, Serializable {
+public class ResearcherAdapter implements Researcher, Serializable {
+    private static final long serialVersionUID = 1L;
+
     private User wrappedUser;
     private List<ResearchPaper> papers;
     private List<ResearchProject> projects;
 
-    public ResearcherDecorator(User user) {
+    public ResearcherAdapter(User user) {
         if (user == null) {
             throw new IllegalArgumentException("Wrapped user cannot be null");
         }
@@ -26,6 +28,7 @@ public class ResearcherDecorator implements Researcher, Serializable {
 
     @Override
     public void publishPaper(ResearchPaper p) {
+        if (p == null) throw new IllegalArgumentException("Paper cannot be null");
         if (!papers.contains(p)) {
             papers.add(p);
         }
@@ -88,7 +91,7 @@ public class ResearcherDecorator implements Researcher, Serializable {
 
     @Override
     public String getFullName() {
-        return "";
+        return wrappedUser.getFullName();
     }
 
     public User getWrappedUser() {

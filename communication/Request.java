@@ -7,7 +7,9 @@ import users.User;
 import users.TechSupportSpecialist;
 import enums.RequestStatus;
 
-public class Request implements Serializable { //extends Message
+public class Request implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private User sender;
     private String description;
@@ -20,6 +22,8 @@ public class Request implements Serializable { //extends Message
 
     public Request(User sender, String description) {
         this.id = UUID.randomUUID().toString().substring(0, 8);
+        if (sender == null) throw new IllegalArgumentException("Sender cannot be null");
+        if (description == null || description.isBlank()) throw new IllegalArgumentException("Description cannot be empty");
         this.sender = sender;
         this.description = description;
         this.status = RequestStatus.NEW;
@@ -27,6 +31,7 @@ public class Request implements Serializable { //extends Message
     }
 
     public void updateStatus(RequestStatus s) {
+        if (s == null) throw new IllegalArgumentException("Status cannot be null");
         this.status = s;
     }
 
@@ -38,7 +43,7 @@ public class Request implements Serializable { //extends Message
     public User getSender() { return sender; }
     public String getDescription() { return description; }
     public RequestStatus getStatus() { return status; }
-    public Date getCreatedDate() { return createdDate; }
+    public Date getCreatedDate() { return new Date(createdDate.getTime()); }
     public TechSupportSpecialist getAssignedTo() { return assignedTo; }
 
     @Override
