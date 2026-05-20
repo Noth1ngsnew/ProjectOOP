@@ -24,7 +24,7 @@ public class Transcript implements Serializable {
 
     public String generate() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n========== TRANSCRIPT ==========\n");
+        sb.append("\n----------- TRANSCRIPT -----------\n");
         sb.append("Student: ").append(student.getFullName()).append("\n");
         sb.append("ID: ").append(student.getStudentId()).append("\n");
         sb.append("School: ").append(student.getSchool()).append("\n");
@@ -36,7 +36,7 @@ public class Transcript implements Serializable {
         }
         sb.append("--------------------------------\n");
         sb.append(String.format("GPA: %.2f%n", gpa));
-        sb.append("================================\n");
+        sb.append("--------------------------------\n");
         return sb.toString();
     }
 

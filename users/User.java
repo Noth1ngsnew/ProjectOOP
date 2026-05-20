@@ -74,7 +74,7 @@ public abstract class User implements Serializable, JournalSubscriber {
         n.addComment(c);
     }
 
-    public void notifyNewPaper(Journal journal, ResearchPaper paper) {
+    public void notifyNewPaper(Journal journal, ResearchPaper paper) { // Реализовывает интерфейс JournalSubscriber
         System.out.println("[" + name + "] New paper in " + journal.getName() + ": \"" + paper.getTitle() + "\"");
     }
 

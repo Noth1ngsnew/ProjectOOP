@@ -106,7 +106,7 @@ public class Teacher extends Employee implements Researcher {
             System.out.println("You don't teach " + c.getName());
             return;
         }
-        System.out.println("\n=== Mark Report: " + c.getName() + " ===");
+        System.out.println("\n--- Mark Report: " + c.getName() + " ---");
         double sum = 0;
         int count = 0;
         int passing = 0;
@@ -122,7 +122,7 @@ public class Teacher extends Employee implements Researcher {
         if (count > 0) {
             System.out.printf("Average: %.2f, Passing: %d/%d%n", sum / count, passing, count);
         }
-        System.out.println("============================\n");
+        System.out.println("----------------------------\n");
     }
 
     public void addRating(double rating) {

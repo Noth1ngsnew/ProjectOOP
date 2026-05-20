@@ -95,7 +95,7 @@ public class Manager extends Employee {
                 " (urgency: " + c.getUrgency() + ")");
     }
 
-    public List<Student> viewStudentsSorted(Comparator<Student> c) {
+    public List<Student> viewStudentsSorted(Comparator<Student> c) { // Использование Strategy Pattern
         List<Student> students = new ArrayList<>();
         for (User u : DataStorage.getInstance().getUsers()) {
             if (u instanceof Student ) {
@@ -106,7 +106,7 @@ public class Manager extends Employee {
         return students;
     }
 
-    public List<Teacher> viewTeachersSorted(Comparator<Teacher> c) {
+    public List<Teacher> viewTeachersSorted(Comparator<Teacher> c) { // Использование Strategy Pattern
         List<Teacher> teachers = new ArrayList<>();
         for (User u : DataStorage.getInstance().getUsers()) {
             if (u instanceof Teacher) teachers.add((Teacher) u);

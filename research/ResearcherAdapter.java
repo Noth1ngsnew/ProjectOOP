@@ -10,14 +10,14 @@ import storage.DataStorage;
 import communication.News;
 import exceptions.NonResearcherException;
 
-public class ResearcherDecorator implements Researcher, Serializable {
+public class ResearcherAdapter implements Researcher, Serializable {
     private static final long serialVersionUID = 1L;
 
     private User wrappedUser;
     private List<ResearchPaper> papers;
     private List<ResearchProject> projects;
 
-    public ResearcherDecorator(User user) {
+    public ResearcherAdapter(User user) {
         if (user == null) {
             throw new IllegalArgumentException("Wrapped user cannot be null");
         }
